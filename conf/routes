@@ -1,0 +1,20 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(file)
+
+GET     /api/auth/check                 controllers.LoginController.authenticate
+POST    /api/auth/login                 controllers.LoginController.login
+GET     /api/auth/logout                controllers.LoginController.logout
+POST    /api/auth/register              controllers.LoginController.register
+
+
+#POST    /api/projects/new
+#GET     /api/projects/all
+#GET     /api/projects/:id
+
+GET     /api/blog/posts                 controllers.BlogController.getPosts
+GET     /api/blog/post/:id              controllers.BlogController.getPost(id: String)
+POST    /api/blog/new                   controllers.BlogController.newPost
