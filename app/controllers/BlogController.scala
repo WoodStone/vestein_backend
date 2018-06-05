@@ -1,5 +1,6 @@
 package controllers
 
+import database.PostRepo
 import javax.inject.{Inject, Singleton}
 import models.BlogPost
 import play.api.db.Database
@@ -9,22 +10,10 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 
 @Singleton
 class BlogController @Inject()(db: Database, cc: ControllerComponents) extends AbstractController(cc) {
+  val postRepo = new PostRepo(db)
 
-  def getPosts = Action { request =>
-    db.withConnection { conn =>
-      val rs = conn.createStatement.executeQuery("SELECT * from Posts")
-
-      val json = Json.toJson(Iterator.continually((rs.next(), rs)).takeWhile(_._1).map { r =>
-        JsObject(Seq(
-          "id" -> JsNumber(r._2.getInt("id")),
-          "user" -> JsString(r._2.getString("username")),
-          "header" -> JsString(r._2.getString("header")),
-          "content" -> JsString(r._2.getString("content"))
-        ))
-      }.toList)
-
-      Ok(json)
-    }
+  def getPosts(page: Int, pageSize: Int) = Action { request =>
+    Ok(postRepo.select(page, pageSize))
   }
 
   def newPost = Action { request =>
@@ -32,13 +21,10 @@ class BlogController @Inject()(db: Database, cc: ControllerComponents) extends A
       request.body.asJson.map { json =>
         json.validate[BlogPost] match {
           case s: JsSuccess[BlogPost] => {
-            db.withConnection { conn =>
-              val st = conn.prepareStatement("INSERT INTO Posts (username, header, content) VALUES (?,?,?)")
-              st.setObject(1, s.value.username)
-              st.setObject(2, s.value.header)
-              st.setObject(3, s.value.content)
-              st.executeUpdate()
+            if (postRepo.insert(s.value)) {
               Ok("Post inserted")
+            } else {
+              BadRequest("Something went wrong with insert")
             }
           }
           case e: JsError => {
@@ -46,7 +32,7 @@ class BlogController @Inject()(db: Database, cc: ControllerComponents) extends A
           }
         }
       }.getOrElse {
-        BadRequest("something went wring with the request")
+        BadRequest("something went wrong with the request")
       }
     }.getOrElse {
       Unauthorized("Oops, you are not connected")
@@ -55,7 +41,15 @@ class BlogController @Inject()(db: Database, cc: ControllerComponents) extends A
   }
 
   def getPost(id: String) = Action { request =>
-    Ok
+    postRepo.select(id) match {
+      case Some(json) => Ok(json)
+      case None => NotFound("No post with that id")
+    }
+  }
+
+  def deletePost(id: String) = Action { request =>
+    //TODO deletePost
+    BadRequest("Not implemented")
   }
 
   implicit val blogPostRead: Reads[BlogPost] = (
