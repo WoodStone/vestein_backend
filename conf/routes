@@ -15,6 +15,8 @@ POST    /api/auth/register              controllers.LoginController.register
 #GET     /api/projects/all
 #GET     /api/projects/:id
 
-GET     /api/blog/posts                 controllers.BlogController.getPosts
-GET     /api/blog/post/:id              controllers.BlogController.getPost(id: String)
-POST    /api/blog/new                   controllers.BlogController.newPost
+GET     /api/blog                       controllers.BlogController.getPosts(page: Int ?= 1, pageSize: Int ?= 5)
+POST    /api/blog                       controllers.BlogController.newPost
+GET     /api/blog/:id                   controllers.BlogController.getPost(id: String)
+#PUT     /api/blog/:id                   controllers.BlogController.replacePost(id: String)
+DELETE  /api/blog/:id                   controllers.BlogController.deletePost(id: String)
