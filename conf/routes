@@ -20,3 +20,10 @@ POST    /api/blog                       controllers.BlogController.newPost
 GET     /api/blog/:id                   controllers.BlogController.getPost(id: String)
 #PUT     /api/blog/:id                   controllers.BlogController.replacePost(id: String)
 DELETE  /api/blog/:id                   controllers.BlogController.deletePost(id: String)
+
+
+GET     /api/projects                   controllers.ProjectController.list(page: Int ?= 1, pageSize: Int ?= 5)
+POST    /api/projects                   controllers.ProjectController.create
+GET     /api/projects/:id               controllers.ProjectController.retrieve(id: String)
+PATCH   /api/projects/:id               controllers.ProjectController.update(id: String)
+DELETE  /api/projects/:id               controllers.ProjectController.delete(id: String)
